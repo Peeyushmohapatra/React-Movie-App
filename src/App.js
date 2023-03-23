@@ -1,24 +1,48 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React, { createContext, useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Header from "./Components/Header/Header";
+import Home from "./Pages/Home/Home";
+import { getMovieList } from "./functions/getMovieList";
+import Movielist from "./Components/MovieList/Movielist";
+import Moviedetails from "./Components/MovieDetails/Moviedetails";
+
+export const Globaldata = createContext();
 
 function App() {
+  const [dataFromPopularApi, setDataFromPopularApi] = useState([]);
+  const [dataFromUpcomingApi, setDataFromUpcomingApi] = useState([]);
+  const [dataFromTopratedApi, setDataFromTopratedApi] = useState([]);
+
+  useEffect(() => {
+    getMovieList(setDataFromPopularApi, "popular");
+    getMovieList(setDataFromUpcomingApi, "upcoming");
+    getMovieList(setDataFromTopratedApi, "top_rated");
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Globaldata.Provider
+        value={{
+          dataFromPopularApi: dataFromPopularApi,
+          dataFromUpcomingApi: dataFromUpcomingApi,
+          dataFromTopratedApi: dataFromTopratedApi,
+        }}
+      >
+        <div className="App">
+          <Router>
+            <Header />
+            <Routes>
+              {/* <Route path="/home" element={<Home />}/> */}
+              <Route path="/" element={<Home />} />
+              <Route path="/movie/:id" element={<Moviedetails />} />
+              <Route path="/movies/:category" element={<Movielist />} />
+              <Route path="/*" element={<>404 Page not found</>} />
+            </Routes>
+          </Router>
+        </div>
+      </Globaldata.Provider>
+    </>
   );
 }
 
